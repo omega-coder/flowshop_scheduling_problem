@@ -7,6 +7,15 @@ from flask import Flask, render_template, url_for, abort
 app = Flask(__name__)
 
 
+@app.route('/')
+def index():
+    return "/ route working"
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=1337)
+
+
 
 
 
