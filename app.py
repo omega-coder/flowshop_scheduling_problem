@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import flask
-from flask import Flask, render_template, url_for, abort
+from flask import Flask, render_template, url_for, abort, request
 import plotly
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -29,6 +29,17 @@ def create_plot():
 
 
 app = Flask(__name__)
+
+@app.route('/solve', methods=["POST"])
+def solve():
+    if request.method == "POST":
+        prob = request.get_json()
+        pfsp_algorithm = prob["algorithm"]
+
+
+
+
+
 
 @app.route('/')
 def index():
