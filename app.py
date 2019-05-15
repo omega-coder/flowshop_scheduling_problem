@@ -3,7 +3,7 @@
 import flask
 from flask import Flask, render_template, url_for, abort
 import plotly
-import plotly.graph_objects as go
+import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 import json
