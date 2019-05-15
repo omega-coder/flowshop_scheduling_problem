@@ -61,7 +61,7 @@ def index():
       dict(Task="Job-3", Start='2017-05-18', Finish='2017-06-18', Resource='Not Started'),
       dict(Task="Job-4", Start='2017-01-14', Finish='2017-03-14', Resource='Complete')]
     """
-    fig = ff.create_gantt(df, group_tasks=True, index_col="Resource")
+    fig = ff.create_gantt(df, group_tasks=True, index_col="Resource", show_colorbar=True, showgrid_x=True, showgrid_y=True)
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
