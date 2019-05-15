@@ -10,10 +10,10 @@
     <div class="container">
       <div class="row">
         <div class="col-md-6">
-          <div class="chart" id="bargraph">
+          <div class="chart" id="gantt">
           	<script>
                 var graphs = {{ plot | safe  }};
-                Plotly.plot('bargraph', graphs, {});
+                Plotly.plot('gantt', graphs, {});
             </script>
 		  </div>
         </div>
