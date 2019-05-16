@@ -3,21 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <title>Flowshop Solver | omega_coder</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/bootstrap.min.css')}} "
+    />
     <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+    <style>
+        body {
+            background-color: #333;
+            color: #f7f7f7;
+        }
+    </style>
   </head>
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-md-6">
+        <div class="col col-md-4">
+          <div class="form-group">
+            <label for="algorithm"
+              ><span class="text-muted">Algorithm</span></label
+            >
+            <select id="algorithm" name="algorithm" class="form-control">
+              <option value="johnson">Johnson</option>
+              <option value="cds">CDS</option>
+              <option value="neh">NEH</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="data"
+              ><span class="text-muted">Problem Data</span></label
+            >
+            <textarea
+              id="data"
+              name="data"
+              cols="30"
+              rows="4"
+              class="form-control"
+              placeholder="Put data here"
+            ></textarea>
+          </div>
+          <button class="btn btn-danger" id="solve" name="solve">Solve</button>
+        </div>
+      </div>
+      <br />
+      <div class="row justify-content-md-center">
+        <div class="col col-md-6">
           <div class="chart" id="gantt">
-          	<script>
-                var graphs = {{ plot | safe  }};
-                Plotly.plot('gantt', graphs, {});
+            <script>
+              var graphs = {{ plot | safe  }};
+              Plotly.plot('gantt', graphs, {});
             </script>
-		  </div>
+          </div>
         </div>
       </div>
     </div>
+    <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js')}}"></script>
   </body>
 </html>
