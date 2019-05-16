@@ -35,11 +35,9 @@ def solve():
     if request.method == "POST":
         prob = request.get_json()
         pfsp_algorithm = prob["algorithm"]
-
-
-
-
-
+        data = prob["data"]
+        print(data)
+        print("algorithm {}".format(pfsp_algorithm))
 
 @app.route('/')
 def index():
@@ -52,24 +50,18 @@ def index():
     df = []
     curr_date = datetime.datetime.now()
     for i, j in zip(jobs_m1, jobs_m2):
-        Start =  (datetime.timedelta(minutes=i["start_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
-        Finish = (datetime.timedelta(minutes=i["end_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+        Start =  (datetime.timedelta(seconds=i["start_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+        Finish = (datetime.timedelta(seconds=i["end_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
         task = {"Task": "M1", "Start": Start, "Finish": Finish, "Resource": i["name"]}
         df.append(task)
-        Start =  (datetime.timedelta(minutes=j["start_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
-        Finish = (datetime.timedelta(minutes=j["end_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+        Start =  (datetime.timedelta(seconds=j["start_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+        Finish = (datetime.timedelta(seconds=j["end_time"]) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
         task = {"Task": "M2", "Start": Start, "Finish": Finish, "Resource": j["name"]}
         df.append(task)
-    fig = ff.create_gantt(df, group_tasks=True, index_col="Resource", show_colorbar=True, showgrid_x=True, showgrid_y=True)
+    fig = ff.create_gantt(df, group_tasks=True, index_col="Resource", show_colorbar=True, showgrid_x=True, showgrid_y=True, width=500, height=600, bar_width=0.1)
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template('index.html', plot=graphJSON)
 
 if __name__ == "__main__":
     app.run(debug=True, port=1337)
-
-
-
-
-
-
 
