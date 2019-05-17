@@ -1,0 +1,31 @@
+{
+  "name": "flowshop_scheduling_problem",
+  "version": "1.0.0",
+  "description": "Implementation of algorithms to solve the  Pemutation flowshop scheduling Problem with python and JS for the interface",
+  "main": "index.js",
+  "dependencies": {
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "prettier": "^1.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omega-coder/flowshop_scheduling_problem.git"
+  },
+  "keywords": [
+    "flowshop",
+    "python",
+    "js",
+    "scheduling"
+  ],
+  "author": "CHERIEF Yassine",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/omega-coder/flowshop_scheduling_problem/issues"
+  },
+  "homepage": "https://github.com/omega-coder/flowshop_scheduling_problem#readme"
+}
