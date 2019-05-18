@@ -8,10 +8,10 @@ $(document).ready(function() {
             data: JSON.stringify( { 'algorithm': $('#algorithm').val(), 'data': $('#data').val() }),
             processData: false,
             success: function(data, textStatus, jQxhr) {
-                console.log("resuest done");
+                Plotly.newPlot('gantt', data, {});
             },
             error: function(jQxhr, textStatus, errorThrow) {
-                // MAKE ERROR Appear
+                console.log(textStatus);
             }
         });    
     });
