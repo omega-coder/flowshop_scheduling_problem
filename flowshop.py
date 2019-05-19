@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import numpy as np
-
 
 class Flowshop(object):
 
@@ -63,6 +61,5 @@ if __name__ == "__main__":
     nb_m = 2
     nb_j = 6
     data = [[6, 2, 10, 4, 5, 3], [5, 4, 3, 8, 2, 4]]
-    data = np.array(data)
     pfsp = Flowshop(data, nb_m, nb_j)
     print(pfsp.solve_johnson())
