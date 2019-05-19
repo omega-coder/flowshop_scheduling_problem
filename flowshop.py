@@ -11,7 +11,7 @@ class Flowshop(object):
     def solve_johnson(self):
         if self.nb_machines != 2:
             raise Exception(
-                "Can not run johnson algorithm on a Problem having more than 2 machines",
+                "Johnson's algorithm is only available for a 2 machine problem",
             )
         # Build optimal sequence array
         machine_1_sequence = [j for j in range(
