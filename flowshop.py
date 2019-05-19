@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import numpy as np
 
 
 class Flowshop(object):
 
-    def __init__(self, data, nb_machines, nb_jobs):
+    def __init__(self, data=None, nb_machines=2, nb_jobs=None):
         self.data = data
         self.nb_machines = nb_machines
         self.nb_jobs = nb_jobs
@@ -11,7 +14,7 @@ class Flowshop(object):
     def solve_johnson(self):
         if self.nb_machines != 2:
             raise Exception(
-                "Johnson's algorithm is only available for a 2 machine problem",
+                "Johnson's algorithm only possible for a 2 machine problem"
             )
         # Build optimal sequence array
         machine_1_sequence = [j for j in range(
@@ -57,9 +60,75 @@ class Flowshop(object):
         return seq, jobs_m1, jobs_m2
 
 
+class RandomFlowshop:
+    """
+     This module makes an instance of random flowshop problem,
+     given number of machines and number of jobs,
+     and generates random data of jobs processing times
+     Example:
+        random_problem = RandomFlowshop(2, 7)
+    """
+
+    def __init__(self, nb_machines, nb_jobs):
+        self.nb_machines = nb_machines
+        self.nb_jobs = nb_jobs
+        self.data = self.get_random_p_times(100)
+
+    def get_random_p_times(self, p_times_ub):
+        """
+        Generates matrix of random processing times of jobs in machines
+
+        Attributes:
+            p_times_ub (int): upper bound of processing times of each job
+
+        Returns:
+            ndarray of random processing times of size (nb_machines x nb_jobs)
+        """
+        return np.random.randint(
+            p_times_ub,
+            size=(
+                self.nb_machines,
+                self.nb_jobs
+            )
+        )
+
+    def get_data(self):
+        """
+        Getter for data attribute
+
+        Returns:
+            ndarray: the return value of random processing times matrix
+        """
+        return self.data
+
+    def get_number_machines(self):
+        """
+        number of machines getter
+
+        Returns:
+            int: Returns number of machines specified in instance problem
+        """
+        return self.nb_machines
+
+    def get_number_jobs(self):
+        """
+        Number of jobs getter
+
+        Returns:
+            int: returns the number of jobs in instance problem
+        """
+        return self.nb_jobs
+
+    def get_problem_instance(self):
+        """
+        Returns a Flowshop instance from randomly generated problem
+        Returns:
+            Flowshop object: A Flowshop object with the randomly generated data
+        """
+        return Flowshop(self.data, self.nb_machines, self.nb_jobs)
+
+
 if __name__ == "__main__":
-    nb_m = 2
-    nb_j = 6
-    data = [[6, 2, 10, 4, 5, 3], [5, 4, 3, 8, 2, 4]]
-    pfsp = Flowshop(data, nb_m, nb_j)
-    print(pfsp.solve_johnson())
+    random_problem = RandomFlowshop(2, 6)
+    pfsp = Flowshop(random_problem.get_data(), 2, 6)
+    print(pfsp)
