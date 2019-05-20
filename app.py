@@ -23,6 +23,19 @@ def parse_problem_data(data):
     return number_machines, number_jobs, processing_t__
 
 
+def ganttfig_to_json(fig):
+    """
+    Transforms a Gantt chart figure to a json using plotly json encoder
+
+    Attributes:
+        fig: a plotly gantt chart figure
+
+    Returns:
+        str: json representation of a gantt figure
+    """
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
 @app.route('/solve', methods=["POST"])
 def solve():
     if request.method == "POST":
@@ -68,8 +81,7 @@ def solve():
                                   index_col="Resource",
                                   show_colorbar=True
                                   )
-            graph_json = json.dumps(
-                fig, cls=plotly.utils.PlotlyJSONEncoder)
+            graph_json = ganttfig_to_json(fig)
             response = app.response_class(
                 response=graph_json,
                 status=200,
