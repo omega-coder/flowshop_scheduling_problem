@@ -76,12 +76,8 @@ def solve():
                 mimetype='application/json',
             )
             return response
-    response = app.response_class(
-        response=json.dumps({"error": "ONLY POST METHOD ALLOWED"}),
-        status=404,
-        mimetype='application/json'
-    )
-    return response
+
+    return render_template("index.html", plot=None)
 
 
 @app.route('/')
