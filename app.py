@@ -6,7 +6,7 @@ import json
 import plotly
 import plotly.figure_factory as ff
 from flask import Flask, render_template, request
-from flowshop import Flowshop
+from flowshop import Flowshop, RandomFlowshop
 
 app = Flask(__name__)
 
@@ -54,9 +54,9 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
         job = list(job)
         for m_id in range(0, nb_machines):
             start_t = (datetime.timedelta(
-                minutes=job[m_id]['start_time']) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+                minutes=int(job[m_id]['start_time'])) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
             finish_t = (datetime.timedelta(
-                minutes=job[m_id]['end_time']) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+                minutes=int(job[m_id]['end_time'])) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
             task = {"Task": "M{}".format(
                 m_id+1), "Start": start_t, "Finish": finish_t, "Resource": job[m_id]["name"]}
             tasks.append(task)
@@ -65,7 +65,17 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
     return fig
 
 
-@app.route('/solve', methods=["POST"])
+def random_johnson(nb_machines, nb_jobs):
+    random_problem = RandomFlowshop(nb_machines, nb_jobs)
+    rand_prob_inst = random_problem.get_problem_instance()
+    _, jobs_m1, jobs_m2 = rand_prob_inst.solve_johnson()
+    fig = jobs_to_gantt_fig([jobs_m1, jobs_m2], random_problem.get_number_machines(
+    ), random_problem.get_number_jobs())
+    gantt_json = ganttfig_to_json(fig)
+    return gantt_json
+
+
+@app.route('/solve', methods=["POST", "GET"])
 def solve():
     if request.method == "POST":
         prob = request.get_json()
@@ -85,7 +95,7 @@ def solve():
             )
             return response
 
-    return render_template("index.html", plot=None)
+    return render_template("index.html", plot=random_johnson(2, 6))
 
 
 @app.route('/')
