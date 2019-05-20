@@ -36,6 +36,35 @@ def ganttfig_to_json(fig):
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
+def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
+    """
+    returns a plotly figure for a gantt chart made from passed jobs
+    Attributes:
+        scheduled_jobs (list): List of jobs on machines m1, m2, ..., mn
+        nb_machines (int): Number of machines
+        nb_jobs (int): number of jobs
+
+    Returns:
+        Plotly.figure: a plotly figure for generated gantt chart
+    """
+    tasks = []
+    curr_date = datetime.datetime.now()
+    zipped_jobs_list = list(zip(*scheduled_jobs))
+    for job in zipped_jobs_list:
+        job = list(job)
+        for m_id in range(0, nb_machines):
+            start_t = (datetime.timedelta(
+                minutes=job[m_id]['start_time']) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+            finish_t = (datetime.timedelta(
+                minutes=job[m_id]['end_time']) + curr_date).strftime("%Y-%m-%d %H:%M:%S")
+            task = {"Task": "M{}".format(
+                m_id+1), "Start": start_t, "Finish": finish_t, "Resource": job[m_id]["name"]}
+            tasks.append(task)
+    fig = ff.create_gantt(tasks, show_colorbar=True, index_col="Resource",
+                          showgrid_x=True, showgrid_y=True, group_tasks=True, bar_width=0.1)
+    return fig
+
+
 @app.route('/solve', methods=["POST"])
 def solve():
     if request.method == "POST":
@@ -47,40 +76,7 @@ def solve():
         if pfsp_algorithm == "johnson":
             _, jobs_m1, jobs_m2 = problem_inst.solve_johnson()
             print(jobs_m1, jobs_m2)
-            df = []
-            curr_date = datetime.datetime.now()
-            for i, j in zip(jobs_m1, jobs_m2):
-                start_t = (datetime.timedelta(
-                    minutes=i["start_time"]
-                ) + curr_date
-                ).strftime("%Y-%m-%d %H:%M:%S")
-                finish_t = (datetime.timedelta(
-                    minutes=i['end_time']
-                ) + curr_date
-                ).strftime("%Y-%m-%d %H:%M:%S")
-                task = {"Task": "M1", "Start": start_t,
-                        "Finish": finish_t, "Resource": i["name"]}
-                df.append(task)
-                start_t = (
-                    datetime.timedelta(
-                        minutes=j["start_time"],
-                    ) + curr_date
-                ).strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-                finish_t = (datetime.timedelta(
-                    minutes=j["end_time"]
-                ) + curr_date
-                ).strftime("%Y-%m-%d %H:%M:%S")
-                task = {"Task": "M2", "Start": start_t,
-                        "Finish": finish_t, "Resource": i["name"]}
-                df.append(task)
-            fig = ff.create_gantt(df, group_tasks=True, bar_width=0.1,
-                                  showgrid_x=True,
-                                  showgrid_y=True,
-                                  index_col="Resource",
-                                  show_colorbar=True
-                                  )
+            fig = jobs_to_gantt_fig([jobs_m1, jobs_m2], num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
             response = app.response_class(
                 response=graph_json,
@@ -148,8 +144,6 @@ def index():
         show_colorbar=True,
         showgrid_x=True,
         showgrid_y=True,
-        width=500,
-        height=600,
         bar_width=0.1,
     )
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
