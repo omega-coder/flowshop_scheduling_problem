@@ -62,7 +62,7 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
                 m_id+1), "Start": start_t, "Finish": finish_t, "Resource": job[m_id]["name"]}
             tasks.append(task)
     fig = ff.create_gantt(tasks, show_colorbar=True, index_col="Resource",
-                          showgrid_x=True, showgrid_y=True, group_tasks=True, bar_width=0.1)
+                          showgrid_x=True, showgrid_y=True, group_tasks=True, bar_width=0.08)
     return fig
 
 
