@@ -14,14 +14,11 @@ app = Flask(__name__)
 
 def parse_problem_data(data):
     data_splitted = data.split('\n')
-    number_machines = int(data_splitted[0].strip())
-    number_jobs = int(data_splitted[1].strip())
     processing_t__ = []
-    for line in data_splitted[2::]:
+    for line in data_splitted:
         temp = list(map(int, line.strip('\n').split(' ')))
         processing_t__.append(temp)
-    print(processing_t__)
-    return number_machines, number_jobs, processing_t__
+    return processing_t__
 
 
 def ganttfig_to_json(fig):
@@ -69,11 +66,11 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
 def random_johnson(nb_machines, nb_jobs):
     random_problem = RandomFlowshop(nb_machines, nb_jobs)
     rand_prob_inst = random_problem.get_problem_instance()
-    _, jobs = rand_prob_inst.solve_johnson()
+    seq, jobs, opt_makespan = rand_prob_inst.solve_johnson()
     fig = jobs_to_gantt_fig(jobs, random_problem.get_number_machines(
     ), random_problem.get_number_jobs())
     gantt_json = ganttfig_to_json(fig)
-    return gantt_json
+    return gantt_json, seq, opt_makespan
 
 
 @app.route('/solve', methods=["POST", "GET"])
@@ -82,26 +79,31 @@ def solve():
         prob = request.get_json()
         pfsp_algorithm = prob["algorithm"]
         data = prob["data"]
-        num_machines, num_jobs, procesing_times = parse_problem_data(data)
+        num_machines = int(prob["nb_machines"])
+        num_jobs = int(prob["nb_jobs"])
+        procesing_times = parse_problem_data(data)
         problem_inst = Flowshop(procesing_times, num_machines, num_jobs)
         if pfsp_algorithm == "johnson":
-            _, jobs = problem_inst.solve_johnson()
+            seq, jobs, optim_makespan = problem_inst.solve_johnson()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+            resp = json.dumps(
+                {"graph": graph_json, "optim_makespan": optim_makespan, "opt_seq": seq})
+
             response = app.response_class(
-                response=graph_json,
+                response=resp,
                 status=200,
                 mimetype='application/json',
             )
             return response
 
-    return render_template("index.html", plot=random_johnson(2, 6))
+    return render_template("index.html", plot=random_johnson(2, 6), seq=seq, opt_makespan=optim_makespan)
 
 
 @app.route('/')
 def index():
-    graph_json = random_johnson(2, 6)
-    return render_template('index.html', plot=graph_json)
+    graph_json, seq, opt_makespan = random_johnson(2, 6)
+    return render_template('index.html', plot=graph_json, seq=seq, opt_makespan=opt_makespan)
 
 
 if __name__ == "__main__":
