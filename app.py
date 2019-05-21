@@ -85,9 +85,8 @@ def solve():
         num_machines, num_jobs, procesing_times = parse_problem_data(data)
         problem_inst = Flowshop(procesing_times, num_machines, num_jobs)
         if pfsp_algorithm == "johnson":
-            _, jobs_m1, jobs_m2 = problem_inst.solve_johnson()
-            print(jobs_m1, jobs_m2)
-            fig = jobs_to_gantt_fig([jobs_m1, jobs_m2], num_machines, num_jobs)
+            _, jobs = problem_inst.solve_johnson()
+            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
             response = app.response_class(
                 response=graph_json,
