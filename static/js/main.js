@@ -33,6 +33,7 @@ $(document).ready(function() {
       success: function(data, textStatus, jQxhr) {
         Plotly.newPlot("gantt", JSON.parse(data["graph"]), {});
         $("#sequence").text(data["opt_seq"]);
+        $("#opt_makespan").text(data["optim_makespan"]);
       },
       error: function(jQxhr, textStatus, errorThrow) {
         console.log(textStatus);
