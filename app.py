@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import datetime
 import json
@@ -68,8 +69,8 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
 def random_johnson(nb_machines, nb_jobs):
     random_problem = RandomFlowshop(nb_machines, nb_jobs)
     rand_prob_inst = random_problem.get_problem_instance()
-    _, jobs_m1, jobs_m2 = rand_prob_inst.solve_johnson()
-    fig = jobs_to_gantt_fig([jobs_m1, jobs_m2], random_problem.get_number_machines(
+    _, jobs = rand_prob_inst.solve_johnson()
+    fig = jobs_to_gantt_fig(jobs, random_problem.get_number_machines(
     ), random_problem.get_number_jobs())
     gantt_json = ganttfig_to_json(fig)
     return gantt_json
