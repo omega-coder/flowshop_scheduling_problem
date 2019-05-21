@@ -77,8 +77,8 @@ class Flowshop(object):
             job = {"name": job_name, "start_time": job_start_m2,
                    "end_time": job_end_m2}
             jobs_m2.append(job)
-
-        return seq, [jobs_m1, jobs_m2]
+        optim_makespan = int(jobs_m2[-1]["end_time"])
+        return seq, [jobs_m1, jobs_m2], optim_makespan
 
 
 class RandomFlowshop:
