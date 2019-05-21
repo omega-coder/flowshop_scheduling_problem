@@ -1,64 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Flowshop Solver | omega_coder</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/bootstrap.min.css')}} "
-    />
-    <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
-    <style>
-        body {
-            background-color: #333;
-            color: #f7f7f7;
-        }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="row">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Flowshop Solver | omega_coder</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}" />
+  <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"><strong>Flowshop</strong> Solver.</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="{{ url_for('index')}}">Home<span class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link" href="javascript:void(0);">Features</a>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#problem_info_modal">
+              Solve Problem
+            </button>
+          </div>
+        </div>
+      </nav>
+  <div class="container-fluid">
+    <div class="row justify-content-md-center">
         <div class="col col-md-4">
-          <div class="form-group">
-            <label for="algorithm"
-              ><span class="text-muted">Algorithm</span></label
-            >
-            <select id="algorithm" name="algorithm" class="form-control">
-              <option value="johnson">Johnson</option>
-              <option value="cds">CDS</option>
-              <option value="neh">NEH</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="data"
-              ><span class="text-muted">Problem Data</span></label
-            >
-            <textarea
-              id="data"
-              name="data"
-              cols="30"
-              rows="4"
-              class="form-control"
-              placeholder="Put data here"
-            ></textarea>
-          </div>
-          <button class="btn btn-danger" id="solve" name="solve">Solve</button>
+          <span>Optimal Jobs sequence</span><br>
+          <span id='sequence'>{{ seq }}</span>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col col-md-8">
+        <div class="chart" id="gantt">
+          <script>
+            Plotly.plot('gantt', {{ plot | safe }}, {});
+          </script>
         </div>
       </div>
-      <br />
-      <div class="row justify-content-md-center">
-        <div class="col col-md-6">
-          <div class="chart" id="gantt">
-            <script>
-              var graphs = {{ plot | safe  }};
-              Plotly.plot('gantt', graphs, {});
-            </script>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="problem_info_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Submit Problem Details</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="algorithm"><span class="text-muted">Algorithm</span></label>
+                        <select id="algorithm" name="algorithm" class="form-control">
+                          <option value="johnson">Johnson</option>
+                          <option value="cds">CDS</option>
+                          <option value="neh">NEH</option>
+                        </select>
+                      </div>
+                </div>
+            </div>
+            <div class="row">
+                  <div class="col col-md-6">
+                      <div class="form-group">
+                          <label for="nb_machines">Number of machines</label>
+                          <input type="number" name="nb_machines" id="nb_machines" class="form-control">
+                      </div>
+                  </div>
+                  <div class="col col-md-6">
+                      <div class="form-group">
+                          <label for="nb_jobs">Number of jobs</label>
+                          <input type="number" name="nb_jobs" id="nb_jobs" class="form-control">
+                      </div>
+                  </div>
+            </div>
+            <div class="row">
+                <div class="col col-md-12">
+                    <div class="form-group">
+                        <label for="data"><span class="text-muted">Problem Data</span></label>
+                        <textarea id="data" name="data" cols="30" rows="4" class="form-control"
+                          placeholder="Put data here"></textarea>
+                    </div>
+                </div>
+            </div>            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-block" id="solve">Solve</button>
           </div>
         </div>
       </div>
     </div>
-    <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/main.js')}}"></script>
-  </body>
+  </div>
+  <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/main.js')}}"></script>
+</body>
+
 </html>
