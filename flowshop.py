@@ -80,7 +80,7 @@ class Flowshop(object):
         optim_makespan = int(jobs_m2[-1]["end_time"])
         return seq, [jobs_m1, jobs_m2], optim_makespan
 
-    def branch_and_bound():
+    def cds(self, parameter_list):
         pass
 
 class RandomFlowshop:
