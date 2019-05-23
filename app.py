@@ -100,6 +100,27 @@ def solve():
     return render_template("index.html", plot=random_johnson(2, 6), seq=seq, opt_makespan=optim_makespan)
 
 
+@app.route('/random', methods=["POST"])
+def random():
+    if request.method == "POST":
+        req = request.get_json()
+        nb_machines = int(req["nb_machines"])
+        nb_jobs = int(req["nb_jobs"])
+        random_problem = RandomFlowshop(nb_machines, nb_jobs)
+        data = random_problem.get_data()
+        resp_data = ""
+        for i in data:
+            resp_data += " ".join(map(lambda x:str(x), i)) + "\n"
+
+        return resp_data.rstrip('\n')
+    # will never reach this hahahha
+    return "This is not intended for you to call :D"
+
+
+
+
+
+
 @app.route('/')
 def index():
     graph_json, seq, opt_makespan = random_johnson(2, 6)
