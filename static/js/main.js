@@ -40,4 +40,23 @@ $(document).ready(function() {
       }
     });
   });
+  $("#gen_random").on("click", function() {
+    $.ajax({
+      url: '/random',
+      dataType: 'text',
+      type: 'post',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        nb_machines: $("#nb_machines").val(),
+        nb_jobs: $("#nb_jobs").val()
+      }),
+      processData: false,
+      success: function(data, textStatus, jQxhr) {
+        $("#data").text(data);
+      },
+      error: function(jQxhr, textStatus, errorThrow) {
+        alert("AJAX ERROR");
+      }
+    }); 
+  });
 });
