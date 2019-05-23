@@ -59,4 +59,11 @@ $(document).ready(function() {
       }
     }); 
   });
+
+
+
+  $("#gantt_toggle").click(function() {
+    $("#gantt").fadeToggle();
+  })
+
 });
