@@ -3,7 +3,7 @@
 
 import numpy as np
 from itertools import permutations
-
+from functools import lru_cache
 class Flowshop(object):
     """
     A class for initiaizing & solving a Permutation Flowshop Scheduling Problem
@@ -129,6 +129,10 @@ class Flowshop(object):
         opt_makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
         return h_seq, schedules, opt_makespan
 
+    def neh(self):
+        raise NotImplementedError
+
+    @lru_cache(maxsize=128)
     def brute_force_exact(self):
         jobs_perm = permutations(range(self.nb_jobs))
         opt_makespan = float("inf")
@@ -238,7 +242,7 @@ class RandomFlowshop:
 
 
 if __name__ == "__main__":
-    random_problem = RandomFlowshop(5, 5)
+    random_problem = RandomFlowshop(6, 8)
     random_problem_instance = random_problem.get_problem_instance()
     seq, scheds, opt_makespan = random_problem_instance.palmer_heuristic()
     b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
