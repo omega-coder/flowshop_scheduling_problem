@@ -1,9 +1,9 @@
 # flowshop_scheduling_problem
-This is an implemention for some algorithms to solve a Permutation Flowshop Scheduling Problem (PFSP).
+This is an implemention for some algorithms to solve a Permutation Flowshop Scheduling Problem (PFSP) using exact methods (**Johnson's Rule**, **Branch And Bound**) and Heuristic algorithms (**Palmer**, **CDS**, **NEH**) and genetic algorithm.
 
 ## NOTE
 
-Not all algorithms are implemented in this repo, until now, only johnson's algorithm is implemented which only works for a 2 machine problem.
+Not all algorithms are implemented in this repo. Until now, only johnson's algorithm and Palmer's heuristic are implemented.
 
 
 ## Deployment
