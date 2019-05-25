@@ -73,7 +73,7 @@ def random_johnson(nb_machines, nb_jobs):
     return gantt_json, seq, opt_makespan
 
 
-@app.route('/solve', methods=["POST", "GET"])
+@app.route('/solve', methods=["POST"])
 def solve():
     if request.method == "POST":
         prob = request.get_json()
@@ -108,8 +108,6 @@ def solve():
                 mimetype="application/json",
             )
             return response
-
-    return render_template("index.html", plot=random_johnson(2, 6), seq=seq, opt_makespan=optim_makespan)
 
 
 @app.route('/random', methods=["POST"])
