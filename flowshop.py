@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-
+from itertools import permutations
 
 class Flowshop(object):
     """
@@ -84,6 +84,11 @@ class Flowshop(object):
         raise NotImplementedError
 
     def palmer_heuristic(self):
+        """solves an N machines M jobs pfsp problem using Palmer's Heuristic
+        
+        Returns:
+            tuple -- a tuple containing the job sequence, scheduled jobs and optimal makespan.
+        """
         def palmer_f(x): return -(self.nb_machines - (2*x - 1))
         weights = list(map(palmer_f, range(1, self.nb_machines+1)))
         ws = []
@@ -123,6 +128,44 @@ class Flowshop(object):
                 schedules[m_id][index+1] = task
         opt_makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
         return h_seq, schedules, opt_makespan
+
+    def brute_force_exact(self):
+        jobs_perm = permutations(range(self.nb_jobs))
+        opt_makespan = float("inf")
+        for seq in jobs_perm:
+            schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
+        # schedule first job alone first
+            task = {"name": "job_{}".format(
+                seq[0]+1), "start_time": 0, "end_time": self.data[0][seq[0]]}
+            schedules[0][0] = task
+            for m_id in range(1, self.nb_machines):
+                start_t = schedules[m_id-1][0]["end_time"]
+                end_t = start_t + self.data[m_id][0]
+                task = {"name": "job_{}".format(
+                    seq[0]+1), "start_time": start_t, "end_time": end_t}
+                schedules[m_id][0] = task
+
+            for index, job_id in enumerate(seq[1::]):
+                start_t = schedules[0][index]["end_time"]
+                end_t = start_t + self.data[0][job_id]
+                task = {"name": "job_{}".format(
+                    job_id+1), "start_time": start_t, "end_time": end_t}
+                schedules[0][index+1] = task
+                for m_id in range(1, self.nb_machines):
+                    start_t = max(schedules[m_id][index]["end_time"],
+                                schedules[m_id-1][index+1]["end_time"])
+                    end_t = start_t + self.data[m_id][job_id]
+                    task = {"name": "job_{}".format(
+                        job_id+1), "start_time": start_t, "end_time": end_t}
+                    schedules[m_id][index+1] = task
+            makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
+            if makespan < opt_makespan:
+                opt_makespan = makespan
+                best_schedule = np.copy(schedules)
+                best_seq = np.copy(seq)
+        
+        return best_seq, best_schedule, opt_makespan
+
 
 
 class RandomFlowshop:
@@ -195,10 +238,13 @@ class RandomFlowshop:
 
 
 if __name__ == "__main__":
-    random_problem = RandomFlowshop(3, 3)
+    random_problem = RandomFlowshop(5, 5)
     random_problem_instance = random_problem.get_problem_instance()
-    seq, scheds = random_problem_instance.palmer_heuristic()
-    print(scheds)
+    seq, scheds, opt_makespan = random_problem_instance.palmer_heuristic()
+    b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
+
+    print("Brute Force: {}, Palmer heuristic: {}".format(b_opt_makespan, opt_makespan))
+    
     #seq, jobs, opt_makespan = random_problem_instance.solve_johnson()
     # print("Sequence: {} \nJobs on Machine 1: \n {} \n Jobs on machine 2:\n {} \n".format(
     #    seq, jobs[0], jobs[1]))
