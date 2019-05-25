@@ -99,27 +99,27 @@ class Flowshop(object):
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
         task = {"name": "job_{}".format(
-            h_seq[0]), "start_time": 0, "end_time": self.data[0][h_seq[0]]}
+            h_seq[0]+1), "start_time": 0, "end_time": self.data[0][h_seq[0]]}
         schedules[0][0] = task
         for m_id in range(1, self.nb_machines):
             start_t = schedules[m_id-1][0]["end_time"]
             end_t = start_t + self.data[m_id][0]
             task = {"name": "job_{}".format(
-                h_seq[0]), "start_time": start_t, "end_time": end_t}
+                h_seq[0]+1), "start_time": start_t, "end_time": end_t}
             schedules[m_id][0] = task
 
         for index, job_id in enumerate(h_seq[1::]):
             start_t = schedules[0][index]["end_time"]
             end_t = start_t + self.data[0][job_id]
             task = {"name": "job_{}".format(
-                job_id), "start_time": start_t, "end_time": end_t}
+                job_id+1), "start_time": start_t, "end_time": end_t}
             schedules[0][index+1] = task
             for m_id in range(1, self.nb_machines):
                 start_t = max(schedules[m_id][index]["end_time"],
                               schedules[m_id-1][index+1]["end_time"])
                 end_t = start_t + self.data[m_id][job_id]
                 task = {"name": "job_{}".format(
-                    job_id), "start_time": start_t, "end_time": end_t}
+                    job_id+1), "start_time": start_t, "end_time": end_t}
                 schedules[m_id][index+1] = task
         opt_makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
         return h_seq, schedules, opt_makespan
@@ -150,6 +150,7 @@ class RandomFlowshop:
             ndarray of random processing times of size (nb_machines x nb_jobs)
         """
         return np.random.randint(
+            1,
             p_times_ub,
             size=(
                 self.nb_machines,
