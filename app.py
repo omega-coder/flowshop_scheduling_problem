@@ -96,6 +96,18 @@ def solve():
                 mimetype='application/json',
             )
             return response
+        elif pfsp_algorithm == "palmer":
+            seq, jobs, opt_makespan = problem_inst.palmer_heuristic()
+            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
+            graph_json = ganttfig_to_json(fig)
+            res = json.dumps(
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+            response = app.response_class(
+                response=resp,
+                status=200,
+                mimetype="application/json",
+            )
+            return response
 
     return render_template("index.html", plot=random_johnson(2, 6), seq=seq, opt_makespan=optim_makespan)
 
@@ -110,15 +122,11 @@ def random():
         data = random_problem.get_data()
         resp_data = ""
         for i in data:
-            resp_data += " ".join(map(lambda x:str(x), i)) + "\n"
+            resp_data += " ".join(map(lambda x: str(x), i)) + "\n"
 
         return resp_data.rstrip('\n')
     # will never reach this hahahha
     return "This is not intended for you to call :D"
-
-
-
-
 
 
 @app.route('/')
