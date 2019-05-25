@@ -13,7 +13,7 @@ A python virtual environement is strongly advised (Optional)
 1. Install requirements
 
 ```bash
-pip install flask plotly
+pip install flask plotly numpy
 ```
 
 or Install using __requirements.txt__ file
@@ -30,7 +30,7 @@ python -m pip install -r requirements.txt
 
 ## TODO
 
-1. Implement solution with CDS and NEH heuristics.
+1. Implement solution with ~Palmer~ CDS and NEH heuristics.
 2. Make a Branch and Bound solution
 
 ## License
