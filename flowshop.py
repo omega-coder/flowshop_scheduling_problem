@@ -81,7 +81,49 @@ class Flowshop(object):
         return seq, [jobs_m1, jobs_m2], optim_makespan
 
     def cds(self, parameter_list):
-        pass
+        raise NotImplementedError
+
+    def palmer_heuristic(self):
+        def palmer_f(x): return -(self.nb_machines - (2*x - 1))
+        weights = list(map(palmer_f, range(1, self.nb_machines+1)))
+        ws = []
+        print(weights)
+        print(self.data)
+        for job_id in range(self.nb_jobs):
+            p_ij = sum([self.data[j][job_id]*weights[j]
+                        for j in range(self.nb_machines)])
+            ws.append((job_id, p_ij))
+        ws.sort(key=lambda x: x[1], reverse=True)
+        h_seq = [x[0] for x in ws]
+        print(h_seq)
+        schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
+        # schedule first job alone first
+        task = {"name": "job_{}".format(
+            h_seq[0]), "start_time": 0, "end_time": self.data[0][h_seq[0]]}
+        schedules[0][0] = task
+        for m_id in range(1, self.nb_machines):
+            start_t = schedules[m_id-1][0]["end_time"]
+            end_t = start_t + self.data[m_id][0]
+            task = {"name": "job_{}".format(
+                h_seq[0]), "start_time": start_t, "end_time": end_t}
+            schedules[m_id][0] = task
+
+        for index, job_id in enumerate(h_seq[1::]):
+            start_t = schedules[0][index]["end_time"]
+            end_t = start_t + self.data[0][job_id]
+            task = {"name": "job_{}".format(
+                job_id), "start_time": start_t, "end_time": end_t}
+            schedules[0][index+1] = task
+            for m_id in range(1, self.nb_machines):
+                start_t = max(schedules[m_id][index]["end_time"],
+                              schedules[m_id-1][index+1]["end_time"])
+                end_t = start_t + self.data[m_id][job_id]
+                task = {"name": "job_{}".format(
+                    job_id), "start_time": start_t, "end_time": end_t}
+                schedules[m_id][index+1] = task
+        opt_makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
+        return h_seq, schedules, opt_makespan
+
 
 class RandomFlowshop:
     """This module makes an instance of random flowshop problem,
@@ -152,8 +194,10 @@ class RandomFlowshop:
 
 
 if __name__ == "__main__":
-    random_problem = RandomFlowshop(2, 6)
+    random_problem = RandomFlowshop(3, 3)
     random_problem_instance = random_problem.get_problem_instance()
-    seq, jobs = random_problem_instance.solve_johnson()
-    print("Sequence: {} \nJobs on Machine 1: \n {} \n Jobs on machine 2:\n {} \n".format(
-        seq, jobs[0], jobs[1]))
+    seq, scheds = random_problem_instance.palmer_heuristic()
+    print(scheds)
+    #seq, jobs, opt_makespan = random_problem_instance.solve_johnson()
+    # print("Sequence: {} \nJobs on Machine 1: \n {} \n Jobs on machine 2:\n {} \n".format(
+    #    seq, jobs[0], jobs[1]))
