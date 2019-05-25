@@ -100,7 +100,7 @@ def solve():
             seq, jobs, opt_makespan = problem_inst.palmer_heuristic()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
-            res = json.dumps(
+            resp = json.dumps(
                 {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
             response = app.response_class(
                 response=resp,
