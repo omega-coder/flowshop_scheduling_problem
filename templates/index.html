@@ -66,10 +66,14 @@
                     <div class="form-group">
                         <label for="algorithm"><span class="text-muted">Algorithm</span></label>
                         <select id="algorithm" name="algorithm" class="form-control">
-                          <option value="johnson">Johnson</option>
-                          <option value="palmer">Palmer's Heuristic</option>
-                          <option value="cds">CDS</option>
-                          <option value="neh">NEH</option>
+                          <optgroup label="Exact algorithms">
+                            <option value="johnson">Johnson</option>
+                          </optgroup>
+                          <optgroup label="Heuristic algorithms">
+                            <option value="palmer">Palmer's Heuristic</option>
+                            <option value="cds">CDS</option>
+                            <option value="neh">NEH</option>
+                          </optgroup>
                         </select>
                       </div>
                 </div>
