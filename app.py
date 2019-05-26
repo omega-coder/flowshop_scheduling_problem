@@ -108,6 +108,30 @@ def solve():
                 mimetype="application/json",
             )
             return response
+        elif pfsp_algorithm == "neh":
+            seq, jobs, opt_makespan = problem_inst.neh_heuristic()
+            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
+            graph_json = ganttfig_to_json(fig)
+            resp = json.dumps(
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+            response = app.response_class(
+                response=resp,
+                status=200,
+                mimetype="application/json",
+            )
+            return response
+        elif pfsp_algorithm == "bruteforce":
+            seq, jobs, opt_makespan = problem_inst.brute_force_exact()
+            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
+            graph_json = ganttfig_to_json(fig)
+            resp = json.dumps(
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+            response = app.response_class(
+                response=resp,
+                status=200,
+                mimetype="application/json",
+            )
+            return response
 
 
 @app.route('/random', methods=["POST"])
