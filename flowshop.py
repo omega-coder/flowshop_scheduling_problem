@@ -4,6 +4,7 @@
 import numpy as np
 from itertools import permutations
 from functools import lru_cache
+
 class Flowshop(object):
     """
     A class for initiaizing & solving a Permutation Flowshop Scheduling Problem
@@ -156,19 +157,14 @@ class Flowshop(object):
                         for j in range(self.nb_machines)])
             sums.append((job_id, p_ij))
         sums.sort(key=lambda x: x[1], reverse=True)
-        order_seq = [x[0] for x in sums]
-        seq = [order_seq[0]]
-        for i in range(1, self.nb_jobs):
-            min_mkspan = float("inf")
-            for j in range(0, i+1):
-                tempo_seq = seq[:]
-                tempo_seq.insert(j, order_seq[i])
-                max_mkspn = self._get_makespan(tempo_seq, self.data)
-                if min_mkspan > max_mkspn:
-                    max_mkspn = min_mkspan
-                    b_seq = tempo_seq
-            seq = b_seq
-        
+        seq = []
+        for job in sums:
+            cands = []
+            for i in range(0, len(seq) + 1):
+                cand = seq[:i] + [job[0]] + seq[i:]
+                cands.append((cand, self._get_makespan(cand, self.data)))
+            seq = min(cands, key= lambda x: x[1])[0]
+
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
         task = {"name": "job_{}".format(
