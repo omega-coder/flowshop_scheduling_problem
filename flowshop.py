@@ -129,47 +129,108 @@ class Flowshop(object):
         opt_makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
         return h_seq, schedules, opt_makespan
 
-    def neh(self):
-        raise NotImplementedError
+    def _get_makespan(self, seq, data):
+        c = np.zeros((self.nb_machines, len(seq)), dtype=object)
+        c[0][0] = (0, data[0][seq[0]])
+        for m_id in range(1, self.nb_machines):
+            s_t = c[m_id-1][0][1]
+            e_t = s_t + data[m_id][0]
+            c[m_id][0] = (s_t, e_t)
+        if len(seq) > 1:
+            for i, job_id in enumerate(seq[1::]):
+                s_t = c[0][i][1]
+                e_t = s_t + data[0][job_id]
+                c[0][i+1] = (s_t, e_t)
+                for m_id in range(1, self.nb_machines):
+                    s_t = max(c[m_id][i][1], c[m_id-1][i+1][1])
+                    e_t = s_t + data[m_id][job_id]
+                    c[m_id][i+1] = (s_t, e_t)
+        
+        return c[self.nb_machines-1][-1][1]
+
+
+    def neh_heuristic(self):
+        sums = []
+        for job_id in range(self.nb_jobs):
+            p_ij = sum([self.data[j][job_id]
+                        for j in range(self.nb_machines)])
+            sums.append((job_id, p_ij))
+        sums.sort(key=lambda x: x[1], reverse=True)
+        order_seq = [x[0] for x in sums]
+        seq = [order_seq[0]]
+        for i in range(1, self.nb_jobs):
+            min_mkspan = float("inf")
+            for j in range(0, i+1):
+                tempo_seq = seq[:]
+                tempo_seq.insert(j, order_seq[i])
+                max_mkspn = self._get_makespan(tempo_seq, self.data)
+                if min_mkspan > max_mkspn:
+                    max_mkspn = min_mkspan
+                    b_seq = tempo_seq
+            seq = b_seq
+        
+        schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
+        # schedule first job alone first
+        task = {"name": "job_{}".format(
+            seq[0]+1), "start_time": 0, "end_time": self.data[0][seq[0]]}
+        schedules[0][0] = task
+        for m_id in range(1, self.nb_machines):
+            start_t = schedules[m_id-1][0]["end_time"]
+            end_t = start_t + self.data[m_id][0]
+            task = {"name": "job_{}".format(
+                seq[0]+1), "start_time": start_t, "end_time": end_t}
+            schedules[m_id][0] = task
+
+        for index, job_id in enumerate(seq[1::]):
+            start_t = schedules[0][index]["end_time"]
+            end_t = start_t + self.data[0][job_id]
+            task = {"name": "job_{}".format(
+                job_id+1), "start_time": start_t, "end_time": end_t}
+            schedules[0][index+1] = task
+            for m_id in range(1, self.nb_machines):
+                start_t = max(schedules[m_id][index]["end_time"],
+                            schedules[m_id-1][index+1]["end_time"])
+                end_t = start_t + self.data[m_id][job_id]
+                task = {"name": "job_{}".format(
+                    job_id+1), "start_time": start_t, "end_time": end_t}
+                schedules[m_id][index+1] = task
+        
+        max_mkspn = int(schedules[self.nb_machines-1][-1]["end_time"])
+        return seq, schedules, max_mkspn
+
 
     @lru_cache(maxsize=128)
     def brute_force_exact(self):
         jobs_perm = permutations(range(self.nb_jobs))
-        opt_makespan = float("inf")
-        for seq in jobs_perm:
-            schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
+        seq = min(jobs_perm, key=lambda x: self._get_makespan(x, self.data))
+        schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
+        task = {"name": "job_{}".format(
+            seq[0]+1), "start_time": 0, "end_time": self.data[0][seq[0]]}
+        schedules[0][0] = task
+        for m_id in range(1, self.nb_machines):
+            start_t = schedules[m_id-1][0]["end_time"]
+            end_t = start_t + self.data[m_id][0]
             task = {"name": "job_{}".format(
-                seq[0]+1), "start_time": 0, "end_time": self.data[0][seq[0]]}
-            schedules[0][0] = task
-            for m_id in range(1, self.nb_machines):
-                start_t = schedules[m_id-1][0]["end_time"]
-                end_t = start_t + self.data[m_id][0]
-                task = {"name": "job_{}".format(
-                    seq[0]+1), "start_time": start_t, "end_time": end_t}
-                schedules[m_id][0] = task
+                seq[0]+1), "start_time": start_t, "end_time": end_t}
+            schedules[m_id][0] = task
 
-            for index, job_id in enumerate(seq[1::]):
-                start_t = schedules[0][index]["end_time"]
-                end_t = start_t + self.data[0][job_id]
+        for index, job_id in enumerate(seq[1::]):
+            start_t = schedules[0][index]["end_time"]
+            end_t = start_t + self.data[0][job_id]
+            task = {"name": "job_{}".format(
+                job_id+1), "start_time": start_t, "end_time": end_t}
+            schedules[0][index+1] = task
+            for m_id in range(1, self.nb_machines):
+                start_t = max(schedules[m_id][index]["end_time"],
+                            schedules[m_id-1][index+1]["end_time"])
+                end_t = start_t + self.data[m_id][job_id]
                 task = {"name": "job_{}".format(
                     job_id+1), "start_time": start_t, "end_time": end_t}
-                schedules[0][index+1] = task
-                for m_id in range(1, self.nb_machines):
-                    start_t = max(schedules[m_id][index]["end_time"],
-                                schedules[m_id-1][index+1]["end_time"])
-                    end_t = start_t + self.data[m_id][job_id]
-                    task = {"name": "job_{}".format(
-                        job_id+1), "start_time": start_t, "end_time": end_t}
-                    schedules[m_id][index+1] = task
-            makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
-            if makespan < opt_makespan:
-                opt_makespan = makespan
-                best_schedule = np.copy(schedules)
-                best_seq = np.copy(seq)
+                schedules[m_id][index+1] = task
+        makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
         
-        return best_seq, best_schedule, opt_makespan
-
+        return seq, schedules, makespan
 
 
 class RandomFlowshop:
@@ -184,7 +245,7 @@ class RandomFlowshop:
     def __init__(self, nb_machines, nb_jobs):
         self.nb_machines = nb_machines
         self.nb_jobs = nb_jobs
-        self.data = self.get_random_p_times(100)
+        self.data = self.get_random_p_times(10)
 
     def get_random_p_times(self, p_times_ub):
         """
@@ -242,12 +303,13 @@ class RandomFlowshop:
 
 
 if __name__ == "__main__":
-    random_problem = RandomFlowshop(6, 8)
+    random_problem = RandomFlowshop(5, 8)
     random_problem_instance = random_problem.get_problem_instance()
-    seq, scheds, opt_makespan = random_problem_instance.palmer_heuristic()
+    seq, neh_sched, mkspn = random_problem_instance.neh_heuristic()
     b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
-
-    print("Brute Force: {}, Palmer heuristic: {}".format(b_opt_makespan, opt_makespan))
+    print(b_opt_makespan, mkspn)
+    #print(seq)
+    #print("Brute Force: {}, Palmer heuristic: {}".format(b_seq, seq))
     
     #seq, jobs, opt_makespan = random_problem_instance.solve_johnson()
     # print("Sequence: {} \nJobs on Machine 1: \n {} \n Jobs on machine 2:\n {} \n".format(
