@@ -81,6 +81,14 @@ class Flowshop(object):
         optim_makespan = int(jobs_m2[-1]["end_time"])
         return seq, [jobs_m1, jobs_m2], optim_makespan
 
+    @staticmethod
+    def johnshon_seq(data):
+        # data matrix must have only two machines
+        raise NotImplementedError
+        
+
+
+
     def cds(self, parameter_list):
         raise NotImplementedError
 
