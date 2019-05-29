@@ -18,6 +18,7 @@ class Flowshop(object):
             nb_machines {int} -- Number of machines for the given problem must be the number of rows of first param (default: {2})
             nb_jobs {[type]} -- Number of jobs for the given problem, must be equal to the number of columns of the data param. (default: {6})
         """
+
         self.nb_machines = nb_machines
         self.nb_jobs = nb_jobs
         if data is not None:
@@ -25,6 +26,7 @@ class Flowshop(object):
         else:
             self.data = RandomFlowshop(
                 self.nb_machines, self.nb_jobs).get_data()
+
 
     def solve_johnson(self):
         """Solves a permutation flowshop problem using johnson's rule for a permutation problem of 2 machines and N jobs 
@@ -82,15 +84,28 @@ class Flowshop(object):
         return seq, [jobs_m1, jobs_m2], optim_makespan
 
     @staticmethod
-    def johnshon_seq(data):
+    def johnson_seq(data):
         # data matrix must have only two machines
+        
+        nb_machines = len(data)
+        nb_jobs = len(data[0])
+
+        machine_1_sequence = [j for j in range(
+            nb_jobs) if data[0][j] <= data[1][j]]
+        machine_1_sequence.sort(key=lambda x: data[0][x])
+        machine_2_sequence = [j for j in range(
+            nb_jobs) if data[0][j] > data[1][j]]
+        machine_2_sequence.sort(key=lambda x: data[1][x], reverse=True)
+
+        seq = machine_1_sequence + machine_2_sequence
+
+        return seq
+
+
+
+    def cds(self):
         raise NotImplementedError
         
-
-
-
-    def cds(self, parameter_list):
-        raise NotImplementedError
 
     def palmer_heuristic(self):
         """solves an N machines M jobs pfsp problem using Palmer's Heuristic
@@ -309,9 +324,9 @@ class RandomFlowshop:
 if __name__ == "__main__":
     random_problem = RandomFlowshop(5, 8)
     random_problem_instance = random_problem.get_problem_instance()
-    seq, neh_sched, mkspn = random_problem_instance.neh_heuristic()
+    seq = random_problem_instance.cds()
     b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
-    print(b_opt_makespan, mkspn)
+    print(b_opt_makespan, seq)
     #print(seq)
     #print("Brute Force: {}, Palmer heuristic: {}".format(b_seq, seq))
     
