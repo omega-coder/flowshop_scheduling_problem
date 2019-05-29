@@ -3,7 +3,7 @@
 
 import datetime
 import json
-
+import numpy as np
 import plotly
 import plotly.figure_factory as ff
 from flask import Flask, render_template, request
@@ -45,6 +45,9 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
     Returns:
         Plotly.figure: a plotly figure for generated gantt chart
     """
+    r = lambda: np.random.randint(0,256, dtype=int)
+    colors = ['#%02X%02X%02X' % (r(),r(),r()) for _ in range(nb_jobs)]
+
     tasks = []
     curr_date = datetime.datetime.now()
     zipped_jobs_list = list(zip(*scheduled_jobs))
@@ -59,7 +62,7 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
                 m_id+1), "Start": start_t, "Finish": finish_t, "Resource": job[m_id]["name"]}
             tasks.append(task)
     fig = ff.create_gantt(tasks, show_colorbar=True, index_col="Resource",
-                          showgrid_x=True, showgrid_y=True, group_tasks=True, bar_width=0.08)
+                          showgrid_x=True, showgrid_y=True, group_tasks=True, bar_width=0.08, colors=colors)
     return fig
 
 
