@@ -45,8 +45,8 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
     Returns:
         Plotly.figure: a plotly figure for generated gantt chart
     """
-    r = lambda: np.random.randint(0,256, dtype=int)
-    colors = ['#%02X%02X%02X' % (r(),r(),r()) for _ in range(nb_jobs)]
+    def r(): return np.random.randint(0, 256, dtype=int)
+    colors = ['#%02X%02X%02X' % (r(), r(), r()) for _ in range(nb_jobs)]
 
     tasks = []
     curr_date = datetime.datetime.now()
@@ -125,6 +125,22 @@ def solve():
             return response
         elif pfsp_algorithm == "bruteforce":
             seq, jobs, opt_makespan = problem_inst.brute_force_exact()
+            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
+            graph_json = ganttfig_to_json(fig)
+            resp = json.dumps(
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+            response = app.response_class(
+                response=resp,
+                status=200,
+                mimetype="application/json",
+            )
+            return response
+
+        elif pfsp_algorithm == "genetic-algorithm":
+            seq, jobs, opt_makespan = problem_inst.genetic_algorithm()
+            print(type(seq))
+            print(type(seq[0]))
+            # exit(0)
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
             resp = json.dumps(
