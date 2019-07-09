@@ -7,36 +7,42 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}" />
   <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
-  <link href="data:image/x-icon;base64,AAABAAEAEBACAAAAAACwAAAAFgAAACgAAAAQAAAAIAAAAAEAAQAAAAAAQAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAA4EAAAOBAAB7vQAA858AAOfPAADP5wAAn/MAAJ/zAACf8wAAn/MAAJ/zAADP5wAA588AAPAfAAD4PwAA" rel="icon" type="image/x-icon" />
+  <link
+    href="data:image/x-icon;base64,AAABAAEAEBACAAAAAACwAAAAFgAAACgAAAAQAAAAIAAAAAEAAQAAAAAAQAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAA4EAAAOBAAB7vQAA858AAOfPAADP5wAAn/MAAJ/zAACf8wAAn/MAAJ/zAADP5wAA588AAPAfAAD4PwAA"
+    rel="icon" type="image/x-icon" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#"><strong>Flowshop</strong>Scheduling Solver.</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"><strong>Flowshop</strong>Scheduling Solver.</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="{{ url_for('index')}}">Home<span class="sr-only">(current)</span></a>
+        <button class="btn btn-danger nav-item" id="gantt_toggle">Toggle Gantt</button>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary nav-item" data-toggle="modal" data-target="#problem_info_modal">
+          Solve Problem
         </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-item nav-link active" href="{{ url_for('index')}}">Home<span class="sr-only">(current)</span></a>
-            <button class="btn btn-danger nav-item" id="gantt_toggle">Toggle Gantt</button>
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary nav-item" data-toggle="modal" data-target="#problem_info_modal">
-              Solve Problem
-            </button>
-          </div>
-        </div>
-      </nav>
+      </div>
+    </div>
+  </nav>
   <div class="container-fluid">
     <div class="row justify-content-md-center">
-        <div class="col col-md-4">
-          <span class="text-muted">Optimal Jobs sequence</span><br>
-          <span id='sequence'>{{ seq }}</span>
-        </div>
-        <div class="col-md-4">
-          <span class="text-muted">Optimal makespan: </span><span id="opt_makespan">{{ opt_makespan }}</span>
-        </div>
+      <div class="col col-md-4">
+        <span class="text-muted">Optimal Jobs sequence</span><br>
+        <span id='sequence'>{{ seq }}</span>
+      </div>
+      <div class="col-md-4">
+        <span class="text-muted">Optimal makespan: </span><span id="opt_makespan">{{ opt_makespan }}</span>
+      </div>
+      <div class="col col-md-4">
+        <span class="text-muted">Running Time: </span><span id="time">{{ time }}</span>
+      </div>
     </div>
     <div class="row">
       <div class="col col-md-8">
@@ -62,50 +68,50 @@
           </div>
           <div class="modal-body">
             <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="algorithm"><span class="text-muted">Algorithm</span></label>
-                        <select id="algorithm" name="algorithm" class="form-control">
-                          <optgroup label="Exact algorithms">
-                            <option value="johnson">Johnson (2 machines only)</option>
-                            <option value="bruteforce">bruteforce</option>
-                          </optgroup>
-                          <optgroup label="Heuristic algorithms">
-                            <option value="palmer">Palmer's Heuristic</option>
-                            <option value="cds">CDS</option>
-                            <option value="neh">NEH</option>
-                          </optgroup>
-                          <optgroup label="Metaheuristic Algorithms">
-                            <option value="genetic-algorithm">Genetic Algorithm</option>
-                          </optgroup>
-                        </select>
-                      </div>
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="algorithm"><span class="text-muted">Algorithm</span></label>
+                  <select id="algorithm" name="algorithm" class="form-control">
+                    <optgroup label="Exact algorithms">
+                      <option value="johnson">Johnson (2 machines only)</option>
+                      <option value="bruteforce">bruteforce</option>
+                    </optgroup>
+                    <optgroup label="Heuristic algorithms">
+                      <option value="palmer">Palmer's Heuristic</option>
+                      <option value="cds">CDS</option>
+                      <option value="neh">NEH</option>
+                    </optgroup>
+                    <optgroup label="Metaheuristic Algorithms">
+                      <option value="genetic-algorithm">Genetic Algorithm</option>
+                    </optgroup>
+                  </select>
                 </div>
+              </div>
             </div>
             <div class="row">
-                  <div class="col col-md-6">
-                      <div class="form-group">
-                          <label for="nb_machines">Number of machines</label>
-                          <input type="number" name="nb_machines" id="nb_machines" class="form-control" value="2">
-                      </div>
-                  </div>
-                  <div class="col col-md-6">
-                      <div class="form-group">
-                          <label for="nb_jobs">Number of jobs</label>
-                          <input type="number" name="nb_jobs" id="nb_jobs" class="form-control" value="3">
-                      </div>
-                  </div>
+              <div class="col col-md-6">
+                <div class="form-group">
+                  <label for="nb_machines">Number of machines</label>
+                  <input type="number" name="nb_machines" id="nb_machines" class="form-control" value="2">
+                </div>
+              </div>
+              <div class="col col-md-6">
+                <div class="form-group">
+                  <label for="nb_jobs">Number of jobs</label>
+                  <input type="number" name="nb_jobs" id="nb_jobs" class="form-control" value="3">
+                </div>
+              </div>
             </div>
             <div class="row">
-                <div class="col col-md-12">
-                    <div class="form-group">
-                        <label for="data"><span class="text-muted">Problem Data</span></label>
-                        <textarea id="data" name="data" cols="30" rows="5" class="form-control"
-                          placeholder="Put data here"></textarea>
-                        <button class="btn btn-danger btn-block" id="gen_random">Generate random data</button>
-                    </div>
+              <div class="col col-md-12">
+                <div class="form-group">
+                  <label for="data"><span class="text-muted">Problem Data</span></label>
+                  <textarea id="data" name="data" cols="30" rows="5" class="form-control"
+                    placeholder="Put data here"></textarea>
+                  <button class="btn btn-danger btn-block" id="gen_random">Generate random data</button>
                 </div>
-            </div>            
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary btn-block" id="solve">Solve</button>
