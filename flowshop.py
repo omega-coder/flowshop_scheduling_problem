@@ -104,7 +104,6 @@ class Flowshop(object):
     def johnson_seq_var_2(data):
         job_count = len(data)
         job_ids = list(range(0, job_count))
-        
         l1 = []
         l2 = []
         for job_info in sorted(zip(job_ids, data), key=lambda t: min(t[1])):
@@ -114,7 +113,6 @@ class Flowshop(object):
                 l1.append(job_id)
             else:
                 l2.insert(0, job_id)
-        
         return l1 + l2
 
 
