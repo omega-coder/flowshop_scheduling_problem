@@ -155,7 +155,7 @@ def solve():
             return response
 
         elif pfsp_algorithm == "cds":
-            seq, jobs, opt_makespan = problem_inst.genetic_algorithm()
+            seq, jobs, opt_makespan = problem_inst.cds()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
             resp = json.dumps(
