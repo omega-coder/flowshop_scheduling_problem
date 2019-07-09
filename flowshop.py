@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 from functools import lru_cache
 from itertools import permutations
-
+import time
 import numpy as np
 
 from geneticFunctions import *
@@ -40,10 +41,18 @@ class Flowshop(object):
         Returns:
             tuple -- returns a tuple containing the optimal sequence of scheduled jobs and a list of scheduled jobs on the 2 machines
         """
+
         if self.nb_machines != 2:
             raise Exception(
                 "Johnson's algorithm only possible for a 2 machine problem"
             )
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+
         # Build optimal sequence array
         machine_1_sequence = [j for j in range(
             self.nb_jobs) if self.data[0][j] <= self.data[1][j]]
@@ -53,6 +62,9 @@ class Flowshop(object):
         machine_2_sequence.sort(key=lambda x: self.data[1][x], reverse=True)
 
         seq = machine_1_sequence + machine_2_sequence
+        
+        e = default_timer.__call__()
+
         jobs_m1, jobs_m2 = [], []
         job_name_rad = "job_"
         job = {"name": job_name_rad +
@@ -84,7 +96,8 @@ class Flowshop(object):
                    "end_time": job_end_m2}
             jobs_m2.append(job)
         optim_makespan = int(jobs_m2[-1]["end_time"])
-        return seq, [jobs_m1, jobs_m2], optim_makespan
+        t_t = e - s
+        return seq, [jobs_m1, jobs_m2], optim_makespan, t_t 
 
     @staticmethod
     def johnson_seq(data):
@@ -123,6 +136,13 @@ class Flowshop(object):
         else:
             data_ndarray = self.data
         data_transposed = data_ndarray.T
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+
         merged_times = [[0, sum(j_t)] for j_t in data_transposed]
         perms = []
         for i in range(0, self.nb_machines-1):
@@ -132,6 +152,8 @@ class Flowshop(object):
             perms.append(Flowshop.johnson_seq_var_2(merged_times))
         
         seq = min(perms, key=lambda p: self._get_makespan(p, self.data))
+
+        e = default_timer.__call__()
 
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
@@ -159,11 +181,8 @@ class Flowshop(object):
                     job_id+1), "start_time": start_t, "end_time": end_t}
                 schedules[m_id][index+1] = task
         max_mkspn = int(schedules[self.nb_machines-1][-1]["end_time"])
-        return seq, schedules, max_mkspn
-
-
-
-        
+        t_t = e - s
+        return seq, schedules, max_mkspn, t_t
 
     def palmer_heuristic(self):
         """solves an N machines M jobs pfsp problem using Palmer's Heuristic
@@ -172,17 +191,23 @@ class Flowshop(object):
         """
 
         def palmer_f(x): return -(self.nb_machines - (2*x - 1))
+        
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+        
         weights = list(map(palmer_f, range(1, self.nb_machines+1)))
         ws = []
-        print(weights)
-        print(self.data)
         for job_id in range(self.nb_jobs):
             p_ij = sum([self.data[j][job_id]*weights[j]
                         for j in range(self.nb_machines)])
             ws.append((job_id, p_ij))
         ws.sort(key=lambda x: x[1], reverse=True)
         h_seq = [x[0] for x in ws]
-        print(h_seq)
+        e = default_timer.__call__()
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
         task = {"name": "job_{}".format(
@@ -209,7 +234,8 @@ class Flowshop(object):
                     job_id+1), "start_time": start_t, "end_time": end_t}
                 schedules[m_id][index+1] = task
         opt_makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
-        return h_seq, schedules, opt_makespan
+        t_t = e - s
+        return h_seq, schedules, opt_makespan, t_t
 
     def _get_makespan(self, seq, data):
         c = np.zeros((self.nb_machines, len(seq)), dtype=object)
@@ -231,6 +257,13 @@ class Flowshop(object):
 
     def neh_heuristic(self):
         sums = []
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+
         for job_id in range(self.nb_jobs):
             p_ij = sum([self.data[j][job_id]
                         for j in range(self.nb_machines)])
@@ -243,6 +276,8 @@ class Flowshop(object):
                 cand = seq[:i] + [job[0]] + seq[i:]
                 cands.append((cand, self._get_makespan(cand, self.data)))
             seq = min(cands, key=lambda x: x[1])[0]
+
+        e = default_timer.__call__()
 
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
@@ -270,12 +305,24 @@ class Flowshop(object):
                     job_id+1), "start_time": start_t, "end_time": end_t}
                 schedules[m_id][index+1] = task
         max_mkspn = int(schedules[self.nb_machines-1][-1]["end_time"])
-        return seq, schedules, max_mkspn
+        
+        t_t = e - s
+        return seq, schedules, max_mkspn, t_t
 
     @lru_cache(maxsize=128)
     def brute_force_exact(self):
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+
         jobs_perm = permutations(range(self.nb_jobs))
         seq = min(jobs_perm, key=lambda x: self._get_makespan(x, self.data))
+        
+        e = default_timer.__call__()
+        
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
         task = {"name": "job_{}".format(
@@ -302,9 +349,17 @@ class Flowshop(object):
                     job_id+1), "start_time": start_t, "end_time": end_t}
                 schedules[m_id][index+1] = task
         makespan = int(schedules[self.nb_machines-1][-1]["end_time"])
-        return seq, schedules, makespan
+        t_t = e -s
+        return seq, schedules, makespan, t_t
 
     def genetic_algorithm(self):
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+
         optimal = [4534, 920, 1302]
         opt = 0
         no_of_jobs, no_of_machines = self.nb_jobs, self.nb_machines
@@ -363,6 +418,7 @@ class Flowshop(object):
 
         seq = list(map(int, costed_population[0][1]))
         makespan = self._get_makespan(seq, self.data)
+        e = default_timer.__call__()
 
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
@@ -389,10 +445,8 @@ class Flowshop(object):
                 task = {"name": "job_{}".format(
                         job_id+1), "start_time": start_t, "end_time": end_t}
                 schedules[m_id][index+1] = task
-
-        #print(seq, makespan)
-        # print(schedules)
-        return seq, schedules, makespan
+        t_t = e - s
+        return seq, schedules, makespan, t_t
 
 
 class RandomFlowshop:
