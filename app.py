@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import datetime
 import json
-
+import time
 import numpy as np
 import plotly
 import plotly.figure_factory as ff
@@ -71,11 +72,11 @@ def jobs_to_gantt_fig(scheduled_jobs, nb_machines, nb_jobs):
 def random_johnson(nb_machines, nb_jobs):
     random_problem = RandomFlowshop(nb_machines, nb_jobs)
     rand_prob_inst = random_problem.get_problem_instance()
-    seq, jobs, opt_makespan = rand_prob_inst.solve_johnson()
+    seq, jobs, opt_makespan, t_t = rand_prob_inst.solve_johnson()
     fig = jobs_to_gantt_fig(jobs, random_problem.get_number_machines(
     ), random_problem.get_number_jobs())
     gantt_json = ganttfig_to_json(fig)
-    return gantt_json, seq, opt_makespan
+    return gantt_json, seq, opt_makespan, t_t
 
 
 @app.route('/solve', methods=["POST"])
@@ -89,11 +90,18 @@ def solve():
         procesing_times = parse_problem_data(data)
         problem_inst = Flowshop(procesing_times, num_machines, num_jobs)
         if pfsp_algorithm == "johnson":
-            seq, jobs, optim_makespan = problem_inst.solve_johnson()
+            seq, jobs, optim_makespan, t_t = problem_inst.solve_johnson()
+
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
             resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": optim_makespan, "opt_seq": seq})
+                {"graph": graph_json, "optim_makespan": optim_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
 
             response = app.response_class(
                 response=resp,
@@ -102,11 +110,18 @@ def solve():
             )
             return response
         elif pfsp_algorithm == "palmer":
-            seq, jobs, opt_makespan = problem_inst.palmer_heuristic()
+            seq, jobs, opt_makespan, t_t = problem_inst.palmer_heuristic()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
             resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
             response = app.response_class(
                 response=resp,
                 status=200,
@@ -114,11 +129,17 @@ def solve():
             )
             return response
         elif pfsp_algorithm == "neh":
-            seq, jobs, opt_makespan = problem_inst.neh_heuristic()
+            seq, jobs, opt_makespan, t_t = problem_inst.neh_heuristic()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
             resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
             response = app.response_class(
                 response=resp,
                 status=200,
@@ -126,11 +147,17 @@ def solve():
             )
             return response
         elif pfsp_algorithm == "bruteforce":
-            seq, jobs, opt_makespan = problem_inst.brute_force_exact()
+            seq, jobs, opt_makespan, t_t = problem_inst.brute_force_exact()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
             resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
             response = app.response_class(
                 response=resp,
                 status=200,
@@ -139,14 +166,17 @@ def solve():
             return response
 
         elif pfsp_algorithm == "genetic-algorithm":
-            seq, jobs, opt_makespan = problem_inst.genetic_algorithm()
-            print(type(seq))
-            print(type(seq[0]))
-            # exit(0)
+            seq, jobs, opt_makespan, t_t = problem_inst.genetic_algorithm()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
             resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
             response = app.response_class(
                 response=resp,
                 status=200,
@@ -155,11 +185,17 @@ def solve():
             return response
 
         elif pfsp_algorithm == "cds":
-            seq, jobs, opt_makespan = problem_inst.cds()
+            seq, jobs, opt_makespan, t_t = problem_inst.cds()
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
             resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq})
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
             response = app.response_class(
                 response=resp,
                 status=200,
@@ -187,9 +223,9 @@ def random():
 
 @app.route('/')
 def index():
-    graph_json, seq, opt_makespan = random_johnson(2, 6)
-    return render_template('index.html', plot=graph_json, seq=seq, opt_makespan=opt_makespan)
+    graph_json, seq, opt_makespan, t_t = random_johnson(2, 6)
+    return render_template('index.html', plot=graph_json, seq=seq, opt_makespan=opt_makespan, time=t_t)
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=1337)
+    app.run(debug=False, port=1337)
