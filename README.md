@@ -3,7 +3,7 @@ This is an implemention for some algorithms to solve a Permutation Flowshop Sche
 
 ## NOTE
 
-Not all algorithms are implemented in this repo. Until now, only johnson's algorithm, Palmer's heuristic, and NEH heuristic are implemented.
+Not all algorithms are implemented in this repo. Until now, only **johnson's** algorithm, **Palmer's** heuristic, **CDS** and **NEH** heuristic are implemented.
 
 
 ## Deployment
@@ -30,8 +30,7 @@ python -m pip install -r requirements.txt
 
 ## TODO
 
-1. Implement solution with ~Palmer~ CDS and ~NEH~ heuristics.
-2. Make a Branch and Bound solution
+1. Make Benchmarks' comparisons
 
 ## License
 
