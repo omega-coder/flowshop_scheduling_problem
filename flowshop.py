@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from itertools import permutations
-import numpy as np
 from functools import lru_cache
+from itertools import permutations
+
+import numpy as np
+
 from geneticFunctions import *
 
 
@@ -30,7 +32,7 @@ class Flowshop(object):
                 self.nb_machines, self.nb_jobs).get_data()
 
     def solve_johnson(self):
-        """Solves a permutation flowshop problem using johnson's rule for a permutation problem of 2 machines and N jobs 
+        """Solves a permutation flowshop problem using johnson's rule for a permutation problem of 2 machines and N jobs
 
         Raises:
             Exception: Raises exception when given a problem with more than 2 machines
@@ -98,8 +100,72 @@ class Flowshop(object):
         seq = machine_1_sequence + machine_2_sequence
         return seq
 
+    @staticmethod
+    def johnson_seq_var_2(data):
+        job_count = len(data)
+        job_ids = list(range(0, job_count))
+        
+        l1 = []
+        l2 = []
+        for job_info in sorted(zip(job_ids, data), key=lambda t: min(t[1])):
+            job_id = job_info[0]
+            job_times = job_info[1]
+            if job_times[0] < job_times[1]:
+                l1.append(job_id)
+            else:
+                l2.insert(0, job_id)
+        
+        return l1 + l2
+
+
+
     def cds(self):
-        raise NotImplementedError
+        if type(self.data) is not np.ndarray:
+            data_ndarray = np.array(self.data)
+        else:
+            data_ndarray = self.data
+        data_transposed = data_ndarray.T
+        merged_times = [[0, sum(j_t)] for j_t in data_transposed]
+        perms = []
+        for i in range(0, self.nb_machines-1):
+            for j in range(0, self.nb_jobs):
+                merged_times[j][0] += data_transposed[j][i]
+                merged_times[j][1] -= data_transposed[j][i]
+            perms.append(Flowshop.johnson_seq_var_2(merged_times))
+        
+        seq = min(perms, key=lambda p: self._get_makespan(p, self.data))
+
+        schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
+        # schedule first job alone first
+        task = {"name": "job_{}".format(
+            seq[0]+1), "start_time": 0, "end_time": self.data[0][seq[0]]}
+        schedules[0][0] = task
+        for m_id in range(1, self.nb_machines):
+            start_t = schedules[m_id-1][0]["end_time"]
+            end_t = start_t + self.data[m_id][0]
+            task = {"name": "job_{}".format(
+                seq[0]+1), "start_time": start_t, "end_time": end_t}
+            schedules[m_id][0] = task
+
+        for index, job_id in enumerate(seq[1::]):
+            start_t = schedules[0][index]["end_time"]
+            end_t = start_t + self.data[0][job_id]
+            task = {"name": "job_{}".format(
+                job_id+1), "start_time": start_t, "end_time": end_t}
+            schedules[0][index+1] = task
+            for m_id in range(1, self.nb_machines):
+                start_t = max(schedules[m_id][index]["end_time"],
+                              schedules[m_id-1][index+1]["end_time"])
+                end_t = start_t + self.data[m_id][job_id]
+                task = {"name": "job_{}".format(
+                    job_id+1), "start_time": start_t, "end_time": end_t}
+                schedules[m_id][index+1] = task
+        max_mkspn = int(schedules[self.nb_machines-1][-1]["end_time"])
+        return seq, schedules, max_mkspn
+
+
+
+        
 
     def palmer_heuristic(self):
         """solves an N machines M jobs pfsp problem using Palmer's Heuristic
@@ -401,15 +467,9 @@ class RandomFlowshop:
 
 
 if __name__ == "__main__":
-    random_problem = RandomFlowshop(4, 5)
+    random_problem = RandomFlowshop(3, 8)
     random_problem_instance = random_problem.get_problem_instance()
-    seq, _, g_mkspan = random_problem_instance.genetic_algorithm()
+    seq = random_problem_instance.cds()
     b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
-    print(type(seq))
-    print(type(seq[0]))
-    print(b_opt_makespan, g_mkspan)
-    # print(seq)
-    #print("Brute Force: {}, Palmer heuristic: {}".format(b_seq, seq))
-    #seq, jobs, opt_makespan = random_problem_instance.solve_johnson()
-    # print("Sequence: {} \nJobs on Machine 1: \n {} \n Jobs on machine 2:\n {} \n".format(
-    #    seq, jobs[0], jobs[1]))
+    cds_seq, cds_scheds, cds_makespan = random_problem_instance.cds()
+    print("[Bruteforce] makespan: {} \n [CDS] makespan: {}".format(b_opt_makespan, cds_makespan))
