@@ -3,10 +3,12 @@
 
 import datetime
 import json
+
 import numpy as np
 import plotly
 import plotly.figure_factory as ff
 from flask import Flask, render_template, request
+
 from flowshop import Flowshop, RandomFlowshop
 
 app = Flask(__name__)
