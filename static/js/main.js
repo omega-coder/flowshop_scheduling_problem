@@ -12,8 +12,8 @@ $(document).ready(function() {
   });
 
   $("#algorithm").change(function() {
-    if ($(this).val() === 'johnson') {
-        $("#nb_machines").val(2);
+    if ($(this).val() === "johnson") {
+      $("#nb_machines").val(2);
     }
   });
 
@@ -34,6 +34,8 @@ $(document).ready(function() {
         Plotly.newPlot("gantt", JSON.parse(data["graph"]), {});
         $("#sequence").text(data["opt_seq"]);
         $("#opt_makespan").text(data["optim_makespan"]);
+        var time_str = data["t_time"].toString() + " " + data["tt"].toString();
+        $("#time").text(time_str);
       },
       error: function(jQxhr, textStatus, errorThrow) {
         console.log(textStatus);
@@ -42,10 +44,10 @@ $(document).ready(function() {
   });
   $("#gen_random").on("click", function() {
     $.ajax({
-      url: '/random',
-      dataType: 'text',
-      type: 'post',
-      contentType: 'application/json',
+      url: "/random",
+      dataType: "text",
+      type: "post",
+      contentType: "application/json",
       data: JSON.stringify({
         nb_machines: $("#nb_machines").val(),
         nb_jobs: $("#nb_jobs").val()
@@ -57,13 +59,10 @@ $(document).ready(function() {
       error: function(jQxhr, textStatus, errorThrow) {
         alert("AJAX ERROR");
       }
-    }); 
+    });
   });
-
-
 
   $("#gantt_toggle").click(function() {
     $("#gantt").fadeToggle();
-  })
-
+  });
 });
