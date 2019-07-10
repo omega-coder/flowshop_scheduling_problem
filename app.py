@@ -9,17 +9,19 @@ import numpy as np
 import plotly
 import plotly.figure_factory as ff
 from flask import Flask, render_template, request
-
+import re
 from flowshop import Flowshop, RandomFlowshop
 
 app = Flask(__name__)
 
 
 def parse_problem_data(data):
+    split_re = re.compile(r"\d+")
     data_splitted = data.split('\n')
     processing_t__ = []
     for line in data_splitted:
-        temp = list(map(int, line.strip('\n').split(' ')))
+        parsed_ints = re.findall(split_re, line)
+        temp = list(map(int, list(parsed_ints)))
         processing_t__.append(temp)
     return processing_t__
 
