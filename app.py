@@ -205,6 +205,25 @@ def solve():
             )
             return response
 
+        elif pfsp_algorithm == "simulated-annealing":
+            seq, jobs, opt_makespan, t_t = problem_inst.simulated_annealing()
+            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
+            graph_json = ganttfig_to_json(fig)
+            if float(t_t) * 1000 > 1000.0:
+                time_ts = t_t
+                time_typ = "seconds"
+            else:
+                time_ts = float(t_t * 1000)
+                time_typ = "msecs"
+            resp = json.dumps(
+                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
+            response = app.response_class(
+                response=resp,
+                status=200,
+                mimetype="application/json",
+            )
+            return response
+
 
 @app.route('/random', methods=["POST"])
 def random():
