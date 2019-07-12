@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import time
 from functools import lru_cache
 from itertools import permutations
-import time
+from random import randint, shuffle
+
 import numpy as np
 
 from geneticFunctions import *
@@ -448,6 +450,93 @@ class Flowshop(object):
         t_t = e - s
         return seq, schedules, makespan, t_t
 
+    def swapTwoJobs(self,seq,pos1,pos2):
+        seq[pos1], seq[pos2] = seq[pos2], seq[pos1]
+        return seq
+
+    def simulated_annealing(self,Ti = 750,Tf = 2.5 ,alpha = 0.93):
+        #Number of jobs given
+        n = self.nb_jobs
+        # of machines given
+        m = self.nb_machines
+        #Initialize the primary seq
+        default_timer = None
+        if sys.platform == "win32":
+            default_timer = time.clock
+        else:
+            default_timer = time.time
+        s = default_timer.__call__()
+
+        old_seq = list([ i for i in range(0,n)])
+        shuffle(old_seq)
+        new_seq = []
+        old_makeSpan = self._get_makespan(old_seq,self.data)
+        new_makeSpan = 0
+        #The difference between the two makespans
+        delta_mk1 = 0
+        #Set of cooling constants
+        Cc = []
+        #Initialize the temperature
+        T = Ti
+        Tf = Tf
+        alpha = alpha
+        # of iterations
+        N_itr = (np.log(Tf/T)/np.log(alpha))
+        temp_cycle = 0
+        while N_itr > 0 :
+            
+            pos1,pos2 = randint(0,n-1),randint(0,n-1)
+            new_seq = self.swapTwoJobs(old_seq,pos1,pos2)
+            new_make_span = self._get_makespan(new_seq,self.data)
+            delta_mk1 = new_make_span - old_makeSpan
+
+            if delta_mk1 <= 0:
+                old_seq = new_seq
+                old_makeSpan = new_make_span
+                N_itr-=1
+            else :
+                Aprob = np.exp(-(delta_mk1/T) ** -1)
+                if Aprob > np.random.uniform():
+                    old_seq = new_seq
+                    old_makeSpan = new_make_span
+                    N_itr -= 1
+                else :
+                    #The solution is discarded
+                    N_itr -= 1
+            T = T * (alpha ** temp_cycle)
+            temp_cycle += 1
+
+        # Result Sequence
+        seq = old_seq
+        e = default_timer.__call__()
+
+        schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
+        # schedule first job alone first
+        task = {"name": "job_{}".format(
+            seq[0] + 1), "start_time": 0, "end_time": self.data[0][seq[0]]}
+        schedules[0][0] = task
+        for m_id in range(1, self.nb_machines):
+            start_t = schedules[m_id - 1][0]["end_time"]
+            end_t = start_t + self.data[m_id][0]
+            task = {"name": "job_{}".format(
+                seq[0] + 1), "start_time": start_t, "end_time": end_t}
+            schedules[m_id][0] = task
+
+        for index, job_id in enumerate(seq[1::]):
+            start_t = schedules[0][index]["end_time"]
+            end_t = start_t + self.data[0][job_id]
+            task = {"name": "job_{}".format(
+                job_id + 1), "start_time": start_t, "end_time": end_t}
+            schedules[0][index + 1] = task
+            for m_id in range(1, self.nb_machines):
+                start_t = max(schedules[m_id][index]["end_time"],
+                              schedules[m_id - 1][index + 1]["end_time"])
+                end_t = start_t + self.data[m_id][job_id]
+                task = {"name": "job_{}".format(
+                    job_id + 1), "start_time": start_t, "end_time": end_t}
+                schedules[m_id][index + 1] = task
+        t_t = e - s
+        return seq, schedules, old_makeSpan, t_t
 
 class RandomFlowshop:
     """This module makes an instance of random flowshop problem,
