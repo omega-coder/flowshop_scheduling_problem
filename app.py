@@ -206,7 +206,10 @@ def solve():
             return response
 
         elif pfsp_algorithm == "simulated-annealing":
-            seq, jobs, opt_makespan, t_t = problem_inst.simulated_annealing()
+            ti = float(prob["ti"])
+            tf = float(prob["tf"])
+            alpha = float(prob["alpha"])
+            seq, jobs, opt_makespan, t_t = problem_inst.simulated_annealing(ti, tf, alpha)
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
             if float(t_t) * 1000 > 1000.0:
