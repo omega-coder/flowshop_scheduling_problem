@@ -54,7 +54,6 @@ class Flowshop(object):
         else:
             default_timer = time.time
         s = default_timer.__call__()
-
         # Build optimal sequence array
         machine_1_sequence = [j for j in range(
             self.nb_jobs) if self.data[0][j] <= self.data[1][j]]
@@ -62,11 +61,8 @@ class Flowshop(object):
         machine_2_sequence = [j for j in range(
             self.nb_jobs) if self.data[0][j] > self.data[1][j]]
         machine_2_sequence.sort(key=lambda x: self.data[1][x], reverse=True)
-
         seq = machine_1_sequence + machine_2_sequence
-        
         e = default_timer.__call__()
-
         jobs_m1, jobs_m2 = [], []
         job_name_rad = "job_"
         job = {"name": job_name_rad +
@@ -454,62 +450,48 @@ class Flowshop(object):
         seq[pos1], seq[pos2] = seq[pos2], seq[pos1]
         return seq
 
-    def simulated_annealing(self,Ti = 750,Tf = 2.5 ,alpha = 0.93):
+    def simulated_annealing(self,Ti = 790,Tf = 3 ,alpha = 0.93):
         #Number of jobs given
         n = self.nb_jobs
-        # of machines given
-        m = self.nb_machines
-        #Initialize the primary seq
         default_timer = None
         if sys.platform == "win32":
             default_timer = time.clock
         else:
             default_timer = time.time
         s = default_timer.__call__()
-
-        old_seq = list([ i for i in range(0,n)])
-        shuffle(old_seq)
-        new_seq = []
-        old_makeSpan = self._get_makespan(old_seq,self.data)
-        new_makeSpan = 0
-        #The difference between the two makespans
+        #Initialize the primary seq
+        old_seq,schedules,old_makeSpan, _ = self.palmer_heuristic()
+        new_seq = []       
         delta_mk1 = 0
-        #Set of cooling constants
-        Cc = []
         #Initialize the temperature
         T = Ti
         Tf = Tf
         alpha = alpha
         # of iterations
-        N_itr = (np.log(Tf/T)/np.log(alpha))
         temp_cycle = 0
-        while N_itr > 0 :
-            
-            pos1,pos2 = randint(0,n-1),randint(0,n-1)
-            new_seq = self.swapTwoJobs(old_seq,pos1,pos2)
+        while T >= Tf  :
+            new_seq = old_seq.copy()
+            job = new_seq.pop(randint(0,n-1))
+            new_seq.insert(randint(0,n-1),job)
             new_make_span = self._get_makespan(new_seq,self.data)
             delta_mk1 = new_make_span - old_makeSpan
-
             if delta_mk1 <= 0:
                 old_seq = new_seq
                 old_makeSpan = new_make_span
-                N_itr-=1
             else :
-                Aprob = np.exp(-(delta_mk1/T) ** -1)
-                if Aprob > np.random.uniform():
+                Aprob = np.exp(-(delta_mk1/T))
+                if Aprob > np.random.uniform(0.5,0.9):
                     old_seq = new_seq
                     old_makeSpan = new_make_span
-                    N_itr -= 1
                 else :
                     #The solution is discarded
-                    N_itr -= 1
-            T = T * (alpha ** temp_cycle)
+                    pass
+            T = T * alpha 
             temp_cycle += 1
 
-        # Result Sequence
-        seq = old_seq
         e = default_timer.__call__()
-
+        #Result Sequence
+        seq = old_seq
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
         task = {"name": "job_{}".format(
