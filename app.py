@@ -168,7 +168,11 @@ def solve():
             return response
 
         elif pfsp_algorithm == "genetic-algorithm":
-            seq, jobs, opt_makespan, t_t = problem_inst.genetic_algorithm()
+            population_number = int(prob["population_number"])
+            it_number = int(prob["it_number"])
+            p_crossover = float(prob["p_crossover"])
+            p_mutation = float(prob["p_mutation"])
+            seq, jobs, opt_makespan, t_t = problem_inst.genetic_algorithm(population_number, it_number, p_crossover, p_mutation)
             fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
             graph_json = ganttfig_to_json(fig)
             if float(t_t) * 1000 > 1000.0:
