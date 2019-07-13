@@ -1,4 +1,6 @@
 $(document).ready(function() {
+  $("#simulated_annealing_params").fadeOut();
+  $("#genetic_algorithm_params").fadeOut();
   $("#nb_machines").change(function() {
     if ($("#algorithm").val() === "johnson") {
       if ($("#nb_machines") !== 2) {
@@ -15,20 +17,59 @@ $(document).ready(function() {
     if ($(this).val() === "johnson") {
       $("#nb_machines").val(2);
     }
+    if ($(this).val() === "simulated-annealing") {
+      $("#simulated_annealing_params").fadeIn();
+    } else {
+      $("#simulated_annealing_params").fadeOut();
+    }
+
+    if ($(this).val() === "genetic-algorithm") {
+      $("#genetic_algorithm_params").fadeIn();
+    } else {
+      $("#genetic_algorithm_params").fadeOut();
+    }
+
+
   });
 
   $("#solve").on("click", function() {
+    
+    if ($("#algorithm").val() === "simulated-annealing") {
+      var data_tbs = JSON.stringify({
+        algorithm: $("#algorithm").val(),
+        data: $("#data").val(),
+        nb_machines: $("#nb_machines").val(),
+        nb_jobs: $("#nb_jobs").val(),
+        ti: $("#init_temp").val(),
+        tf: $("#f_temp").val(),
+        alpha: $("#alpha").val()
+      });
+    } else if ($("#algorithm").val() === "genetic-algorithm") {
+      var data_tbs = JSON.stringify({
+        algorithm: $("#algorithm").val(),
+        data: $("#data").val(),
+        nb_machines: $("#nb_machines").val(),
+        nb_jobs: $("#nb_jobs").val(),
+        population_number: $("#pop_number").val(),
+        it_number: $("#it_number").val(),
+        p_crossover: $("#p_crossover").val(),
+        p_mutation: $("#p_mutation").val()
+      });
+    } else {
+      var data_tbs = JSON.stringify({
+        algorithm: $("#algorithm").val(),
+        data: $("#data").val(),
+        nb_machines: $("#nb_machines").val(),
+        nb_jobs: $("#nb_jobs").val()
+      });
+    }
+    
     $.ajax({
       url: "/solve",
       dataType: "json",
       type: "post",
       contentType: "application/json",
-      data: JSON.stringify({
-        algorithm: $("#algorithm").val(),
-        data: $("#data").val(),
-        nb_machines: $("#nb_machines").val(),
-        nb_jobs: $("#nb_jobs").val()
-      }),
+      data: data_tbs,
       processData: false,
       success: function(data, textStatus, jQxhr) {
         Plotly.newPlot("gantt", JSON.parse(data["graph"]), {});
