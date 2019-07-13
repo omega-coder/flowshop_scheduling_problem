@@ -58,7 +58,7 @@
     <!-- Modal -->
     <div class="modal fade" id="problem_info_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
       aria-hidden="true">
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">Submit Problem Details</h5>
@@ -100,6 +100,52 @@
                 <div class="form-group">
                   <label for="nb_jobs">Number of jobs</label>
                   <input type="number" name="nb_jobs" id="nb_jobs" class="form-control" value="3">
+                </div>
+              </div>
+            </div>
+            <div class="row" id="simulated_annealing_params">
+              <div class="col col-md-4">
+                <div class="form-group">
+                  <label for="nb_machines">Initial temperature</label>
+                  <input type="number" name="init_temp" id="init_temp" min="0" class="form-control" value="790">
+                </div>
+              </div>
+              <div class="col col-md-4">
+                <div class="form-group">
+                  <label for="nb_jobs">Final temperature</label>
+                  <input type="number" name="f_temp" id="f_temp" min="0" step="0.5" class="form-control" value="3">
+                </div>
+              </div>
+              <div class="col col-md-4">
+                <div class="form-group">
+                  <label for="nb_jobs">alpha <span style="font-size: 120%;">&alpha;</span></label>
+                  <input type="number" name="alpha" id="alpha" min="0" max="1" step="0.01" class="form-control" value="0.93">
+                </div>
+              </div>
+            </div>
+            <div class="row" id="genetic_algorithm_params">
+              <div class="col col-md-3">
+                <div class="form-group">
+                  <label for="nb_machines">population number</label>
+                  <input type="number" name="pop_number" id="pop_number" min="0" class="form-control" value="200">
+                </div>
+              </div>
+              <div class="col col-md-3">
+                <div class="form-group">
+                  <label for="nb_jobs">Num. of iterations</label>
+                  <input type="number" name="it_number" id="it_number" min="0" step="1" class="form-control" value="5000">
+                </div>
+              </div>
+              <div class="col col-md-3">
+                <div class="form-group">
+                  <label for="nb_jobs">Crossover probability</label>
+                  <input type="number" name="p_crossover" id="p_crossover" min="0" max="1" step="0.01" class="form-control" value="1.0">
+                </div>
+              </div>
+              <div class="col col-md-3">
+                <div class="form-group">
+                  <label for="nb_jobs">Mutation probability</label>
+                  <input type="number" name="p_mutation" id="p_mutation" min="0" max="1" step="0.01" class="form-control" value="1.0">
                 </div>
               </div>
             </div>
