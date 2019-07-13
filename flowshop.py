@@ -350,7 +350,10 @@ class Flowshop(object):
         t_t = e -s
         return seq, schedules, makespan, t_t
 
-    def genetic_algorithm(self):
+    def genetic_algorithm(self, population_number, it_number=5000, p_crossover=1.0, p_mutation=1.0):
+        if population_number is None:
+            population_number = self.nb_jobs**2
+            
         default_timer = None
         if sys.platform == "win32":
             default_timer = time.clock
@@ -368,10 +371,10 @@ class Flowshop(object):
                 temp.append(self.data[j][i])
             processing_time.append(temp)
         # generate an initial population proportional to no_of_jobs
-        number_of_population = no_of_jobs**2
-        no_of_iterations = 5000
-        p_crossover = 1.0
-        p_mutation = 1.0
+        number_of_population = population_number
+        no_of_iterations = it_number
+        p_crossover = p_crossover
+        p_mutation = p_mutation
 
         # Initialize population
         population = initialize_population(
