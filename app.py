@@ -172,17 +172,28 @@ def solve():
             it_number = int(prob["it_number"])
             p_crossover = float(prob["p_crossover"])
             p_mutation = float(prob["p_mutation"])
-            seq, jobs, opt_makespan, t_t = problem_inst.genetic_algorithm(population_number, it_number, p_crossover, p_mutation)
-            fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
-            graph_json = ganttfig_to_json(fig)
+            nograph = prob["nograph"]
+            if nograph:
+                seq, jobs, opt_makespan, t_t = problem_inst.genetic_algorithm(population_number, it_number, p_crossover, p_mutation, nograph=True)    
+                print("No Graph genetic done")
+            else:
+                seq, jobs, opt_makespan, t_t = problem_inst.genetic_algorithm(population_number, it_number, p_crossover, p_mutation)
+                fig = jobs_to_gantt_fig(jobs, num_machines, num_jobs)
+                graph_json = ganttfig_to_json(fig)
+            
             if float(t_t) * 1000 > 1000.0:
                 time_ts = t_t
                 time_typ = "seconds"
             else:
                 time_ts = float(t_t * 1000)
                 time_typ = "msecs"
-            resp = json.dumps(
-                {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
+            if nograph:
+                resp = json.dumps(
+                    {"graph": None, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
+            else:
+                resp = json.dumps(
+                    {"graph": graph_json, "optim_makespan": opt_makespan, "opt_seq": seq, "t_time": time_ts, "tt": time_typ})
+            
             response = app.response_class(
                 response=resp,
                 status=200,
