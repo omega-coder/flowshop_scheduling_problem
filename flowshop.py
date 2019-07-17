@@ -350,7 +350,7 @@ class Flowshop(object):
         t_t = e -s
         return seq, schedules, makespan, t_t
 
-    def genetic_algorithm(self, population_number, it_number=5000, p_crossover=1.0, p_mutation=1.0):
+    def genetic_algorithm(self, population_number, it_number=5000, p_crossover=1.0, p_mutation=1.0, nograph=False):
         if population_number is None:
             population_number = self.nb_jobs**2
             
@@ -420,6 +420,9 @@ class Flowshop(object):
         seq = list(map(int, costed_population[0][1]))
         makespan = self._get_makespan(seq, self.data)
         e = default_timer.__call__()
+        if nograph:
+            t_t = e - s
+            return seq, None, makespan, t_t  
 
         schedules = np.zeros((self.nb_machines, self.nb_jobs), dtype=dict)
         # schedule first job alone first
@@ -593,9 +596,10 @@ class RandomFlowshop:
 
 
 if __name__ == "__main__":
-    random_problem = RandomFlowshop(3, 8)
+    random_problem = RandomFlowshop(20, 100)
     random_problem_instance = random_problem.get_problem_instance()
-    seq = random_problem_instance.cds()
-    b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
-    cds_seq, cds_scheds, cds_makespan = random_problem_instance.cds()
-    print("[Bruteforce] makespan: {} \n [CDS] makespan: {}".format(b_opt_makespan, cds_makespan))
+    #seq = random_problem_instance.cds()
+    #b_seq, b_scheds, b_opt_makespan = random_problem_instance.brute_force_exact()
+    ga_seq, ga_scheds, ga_makespan, t_t  = random_problem_instance.genetic_algorithm(population_number=None, it_number=500, p_crossover=1.0, p_mutation=1.0)
+    print("ga_mkspan: {}, t_t: {}".format(ga_makespan, t_t))
+
